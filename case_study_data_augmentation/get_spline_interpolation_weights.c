@@ -1,3 +1,5 @@
+// copy from scipy.
+
 #include <math.h>
 #include <stdio.h> 
 

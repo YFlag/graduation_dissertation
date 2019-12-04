@@ -4,26 +4,32 @@ import numpy as np
 from PIL import Image
 
 
-def rotate(im, theta=None, rotation_matrix=None, center=False):
+def rotate(im, theta=None, *, rotation_matrix=None, center=False):
+    """ 
+    rotate an image.
+    1. the origin of `im` is assumed to be bottom-left (0, 0) point. 
+    2. the base coordinates preassumption: Descartes Coords.
+    3. direction: theta is asssumed to be counter-clockwise. """
+    
+    """ paramater validation. """
     assert theta is not None or rotation_matrix is not None
     
-    """ theta: clockwise? counter-clockwise? """
-    """ the origin of `im` is assumed to be bottom-left (0, 0) point. """
     if theta is not None:
         rad = theta * math.pi / 180
-    if rotation_matrix is None:
         rotation_matrix = np.array([[ math.cos(rad), -math.sin(rad),  0.        ],
                                     [ math.sin(rad),  math.cos(rad),  0.        ],
                                     [ 0.        ,  0.        ,  1.        ]])
+    elif rotation_matrix is not None:
+        """ just use `rotation_matrix` directly. """
+        pass
+    if center == True:
+        rotation_matrix = transform_matrix_offset_center(rotation_matrix, im.width, im.height)
     im_arr = np.array(im)
     im_t_arr = np.zeros_like(im)
 
     for x in range(im.width):
         for y in range(im.height):
             cur_coords = np.array([x, y, 1]).reshape(3, 1)
-    #         new_coords = np.matmul(rotation_matrix, cur_coords).flatten().tolist()[:-1]
-    #         new_coords = np.array(list(map(round, new_coords)))
-    #         if validate_coords(*new_coords, im):
             new_x, new_y, _ = np.matmul(rotation_matrix, cur_coords).flatten()
             new_x, new_y = int(round(new_x)), int(round(new_y))
             if validate_coords(new_x, new_y, im):
@@ -37,6 +43,7 @@ def rotate(im, theta=None, rotation_matrix=None, center=False):
 
 
 def transform_matrix_offset_center(matrix, x, y):
+    """ copied from scipy. """
     o_x = float(x) / 2 + 0.5
     o_y = float(y) / 2 + 0.5
     offset_matrix = np.array([[1, 0, o_x], [0, 1, o_y], [0, 0, 1]])
@@ -45,7 +52,7 @@ def transform_matrix_offset_center(matrix, x, y):
     return transform_matrix
 
 
-""" [todo] naming? place where? """
+""" [todo] naming? """
 def validate_coords(x, y, im):
     """ a valid x or y is assumed to be in the interval [0, width+1) or [0, height+1). """
     if x < 0 or y < 0:
@@ -55,3 +62,9 @@ def validate_coords(x, y, im):
     if y >= im.height:
         return False
     return True
+
+
+def lib_test():
+    print(1)
+    
+    
