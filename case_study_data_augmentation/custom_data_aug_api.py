@@ -7,7 +7,7 @@ from PIL import Image
 def rotate(im, theta=None, *, rotation_matrix=None, center=False):
     """ 
     rotate an image.
-    1. the origin of `im` is assumed to be bottom-left (0, 0) point. 
+    1. the origin (0, 0) point is assumed to be bottom-left pixel of `im` . 
     2. the base coordinates preassumption: Descartes Coords.
     3. direction: theta is asssumed to be counter-clockwise. """
     
@@ -16,21 +16,27 @@ def rotate(im, theta=None, *, rotation_matrix=None, center=False):
     
     if theta is not None:
         rad = theta * math.pi / 180
+        # print(theta, rad)
         rotation_matrix = np.array([[ math.cos(rad), -math.sin(rad),  0.        ],
                                     [ math.sin(rad),  math.cos(rad),  0.        ],
                                     [ 0.        ,  0.        ,  1.        ]])
+        # print(rotation_matrix)
     elif rotation_matrix is not None:
         """ just use `rotation_matrix` directly. """
         pass
     if center == True:
         rotation_matrix = transform_matrix_offset_center(rotation_matrix, im.width, im.height)
+        print(rotation_matrix)
     im_arr = np.array(im)
     im_t_arr = np.zeros_like(im)
 
     for x in range(im.width):
         for y in range(im.height):
+            # print(x, y, end=' -> ')
             cur_coords = np.array([x, y, 1]).reshape(3, 1)
             new_x, new_y, _ = np.matmul(rotation_matrix, cur_coords).flatten()
+            # print(new_x, new_y)
+            # input()
             new_x, new_y = int(round(new_x)), int(round(new_y))
             if validate_coords(new_x, new_y, im):
                 try:
@@ -62,9 +68,3 @@ def validate_coords(x, y, im):
     if y >= im.height:
         return False
     return True
-
-
-def lib_test():
-    print(1)
-    
-    
